@@ -125,7 +125,14 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                             Icons.search,
                             color: Color.fromRGBO(37, 36, 34, 1),
                           ),
-                        )
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          'Search',
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                        ),
                       ],
                     ),
                   ),

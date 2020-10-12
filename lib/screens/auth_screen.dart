@@ -21,47 +21,33 @@ class AuthScreen extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           Container(
+            height: 400,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromRGBO(64, 61, 57, 1),
-                  Color.fromRGBO(64, 61, 57, 0.9)
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                stops: [0, 1],
-              ),
+              color: Color.fromRGBO(64, 61, 57, 1),
+              // gradient: LinearGradient(
+              //   colors: [
+              //     Color.fromRGBO(64, 61, 57, 1).withOpacity(0.7),
+              //     Color.fromRGBO(64, 61, 57, 1),
+              //   ],
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              // ),
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(30),
+                  bottomLeft: Radius.circular(30)),
             ),
           ),
-          SingleChildScrollView(
-            child: Container(
-              height: deviceSize.height,
-              width: deviceSize.width,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 50),
-                      child: Text(
-                        'Zenith Lightning',
-                        style: TextStyle(
-                          color: Theme.of(context).accentTextTheme.title.color,
-                          fontSize: 40,
-                          fontFamily: 'Anton',
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: deviceSize.width > 600 ? 2 : 1,
-                    child: AuthCard(),
-                  ),
-                ],
-              ),
+          Positioned(
+            top: 120,
+            right: 70,
+            child: Text(
+              'Zenith Lightning',
+              style: TextStyle(color: Colors.white, fontSize: 40),
+              textAlign: TextAlign.center,
             ),
+          ),
+          Center(
+            child: AuthCard(),
           ),
         ],
       ),
@@ -211,9 +197,9 @@ class _AuthCardState extends State<AuthCard>
     final deviceSize = MediaQuery.of(context).size;
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(30.0),
       ),
-      elevation: 8.0,
+      elevation: 5.0,
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
         curve: Curves.easeIn,

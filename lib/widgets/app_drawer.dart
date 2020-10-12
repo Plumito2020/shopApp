@@ -9,11 +9,13 @@ import '../providers/auth.dart';
 class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isAdmin = Provider.of<Auth>(context).isAdmin;
     return Drawer(
       child: Column(
         children: <Widget>[
           AppBar(
-            title: Text('Hello Friend!'),
+            title: Text('Welcome!'),
+            backgroundColor: Color.fromRGBO(235, 94, 40, 1),
             automaticallyImplyLeading: false,
           ),
           Divider(),
@@ -39,15 +41,16 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           Divider(),
-          ListTile(
-            leading: Icon(Icons.edit),
-            title: Text('Manage Products'),
-            onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(UserProductsScreen.routeName);
-            },
-          ),
-          Divider(),
+          if (isAdmin)
+            ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('Manage Products'),
+              onTap: () {
+                Navigator.of(context)
+                    .pushReplacementNamed(UserProductsScreen.routeName);
+              },
+            ),
+          if (isAdmin) Divider(),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),

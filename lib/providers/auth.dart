@@ -12,6 +12,11 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
+  bool _isAdmin = false;
+
+  bool get isAdmin {
+    return _isAdmin;
+  }
 
   bool get isAuth {
     return token != null;
@@ -59,6 +64,12 @@ class Auth with ChangeNotifier {
         ),
       );
       _autoLogout();
+      // Verify if its an admin account
+      if (email.contains("zak@gmail.fr")) {
+        _isAdmin = true;
+      } else {
+        _isAdmin = false;
+      }
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       final userData = json.encode(
@@ -72,6 +83,7 @@ class Auth with ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    print(_isAdmin);
   }
 
   Future<void> signup(String email, String password) async {
