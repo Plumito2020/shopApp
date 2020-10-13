@@ -41,16 +41,17 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           Divider(),
-          if (isAdmin)
-            ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Manage Products'),
-              onTap: () {
-                Navigator.of(context)
-                    .pushReplacementNamed(UserProductsScreen.routeName);
-              },
-            ),
-          if (isAdmin) Divider(),
+          // if (isAdmin)
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Manage Products'),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(UserProductsScreen.routeName);
+            },
+          ),
+          // if (isAdmin)
+          Divider(),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),

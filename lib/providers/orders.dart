@@ -11,12 +11,14 @@ class OrderItem {
   final double amount;
   final List<CartItem> products;
   final DateTime dateTime;
+  final String orderState;
 
   OrderItem({
     @required this.id,
     @required this.amount,
     @required this.products,
     @required this.dateTime,
+    this.orderState = "inProgress",
   });
 }
 
@@ -32,7 +34,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetAllOrders() async {
-    final url = 'https://stage-1a56d.firebaseio.com/orders?auth=$authToken';
+    final url = 'https://stage-1a56d.firebaseio.com/orders.json';
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -55,6 +57,7 @@ class Orders with ChangeNotifier {
                 ),
               )
               .toList(),
+          orderState: orderData['state'],
         ),
       );
     });
@@ -63,8 +66,9 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetOrders() async {
-    final url =
-        'https://stage-1a56d.firebaseio.com/orders/$userId.json?auth=$authToken';
+    // final filterString =
+    //     'orderBy="userId"&equalTo="XMlft7aDaNdaGrRSeZz33gZIMVC3"';
+    final url = 'https://stage-1a56d.firebaseio.com/orders.json';
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -72,23 +76,26 @@ class Orders with ChangeNotifier {
       return;
     }
     extractedData.forEach((orderId, orderData) {
-      loadedOrders.add(
-        OrderItem(
-          id: orderId,
-          amount: orderData['amount'],
-          dateTime: DateTime.parse(orderData['dateTime']),
-          products: (orderData['products'] as List<dynamic>)
-              .map(
-                (item) => CartItem(
-                  id: item['id'],
-                  price: item['price'],
-                  quantity: item['quantity'],
-                  title: item['title'],
-                ),
-              )
-              .toList(),
-        ),
-      );
+      if (orderData["userId"] == userId) {
+        loadedOrders.add(
+          OrderItem(
+            id: orderId,
+            amount: orderData['amount'],
+            dateTime: DateTime.parse(orderData['dateTime']),
+            products: (orderData['products'] as List<dynamic>)
+                .map(
+                  (item) => CartItem(
+                    id: item['id'],
+                    price: item['price'],
+                    quantity: item['quantity'],
+                    title: item['title'],
+                  ),
+                )
+                .toList(),
+            orderState: orderData['state'],
+          ),
+        );
+      }
     });
     _orders = loadedOrders.reversed.toList();
     notifyListeners();
@@ -135,11 +142,12 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url =
-        'https://stage-1a56d.firebaseio.com/orders/$userId.json?auth=$authToken';
+        'https://stage-1a56d.firebaseio.com/orders.json?auth=$authToken';
     final timestamp = DateTime.now();
     final response = await http.post(
       url,
       body: json.encode({
+        'userId': "XMlft7aDaNdaGrRSeZz33gZIMVC3",
         'amount': total,
         'dateTime': timestamp.toIso8601String(),
         'products': cartProducts
@@ -150,6 +158,7 @@ class Orders with ChangeNotifier {
                   'price': cp.price,
                 })
             .toList(),
+        'state': "In progress...",
       }),
     );
     _orders.insert(
@@ -162,5 +171,33 @@ class Orders with ChangeNotifier {
       ),
     );
     notifyListeners();
+  }
+
+  Future<void> confirmOrCancelOrder(String id, OrderItem order) async {
+    final orderIndex = _orders.indexWhere((order) => order.id == id);
+
+    if (orderIndex >= 0) {
+      final url =
+          'https://stage-1a56d.firebaseio.com/orders/$id.json?auth=$authToken';
+      await http.put(url,
+          body: json.encode({
+            'amount': order.amount,
+            'dateTime': order.dateTime.toIso8601String(),
+            'products': order.products
+                .map((cp) => {
+                      'id': cp.id,
+                      'title': cp.title,
+                      'quantity': cp.quantity,
+                      'price': cp.price,
+                    })
+                .toList(),
+            'state': order.orderState,
+          }));
+      _orders[orderIndex] = order;
+      print(order.orderState);
+      notifyListeners();
+    } else {
+      print('...');
+    }
   }
 }
