@@ -34,7 +34,8 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetAllOrders() async {
-    final url = 'https://stage-1a56d.firebaseio.com/orders.json';
+    final url =
+        'https://stage-1a56d.firebaseio.com/orders.json?auth=$authToken';
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -68,7 +69,8 @@ class Orders with ChangeNotifier {
   Future<void> fetchAndSetOrders() async {
     // final filterString =
     //     'orderBy="userId"&equalTo="XMlft7aDaNdaGrRSeZz33gZIMVC3"';
-    final url = 'https://stage-1a56d.firebaseio.com/orders.json';
+    final url =
+        'https://stage-1a56d.firebaseio.com/orders.json?auth=$authToken';
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -104,7 +106,7 @@ class Orders with ChangeNotifier {
   Future<void> archiveOrder(OrderItem order) async {
     final orderId = order.id;
     final archiveUrl =
-        'https://stage-1a56d.firebaseio.com/archive/$userId.json?auth=$authToken';
+        'https://stage-1a56d.firebaseio.com/archive.json?auth=$authToken';
     final timestamp = DateTime.now();
     final response = await http.post(
       archiveUrl,
@@ -120,11 +122,12 @@ class Orders with ChangeNotifier {
                   'price': cp.price,
                 })
             .toList(),
+        'state': order.orderState,
       }),
     );
 
     final orderUrl =
-        'https://stage-1a56d.firebaseio.com/orders/$userId.json/$orderId.json?auth=$authToken';
+        'https://stage-1a56d.firebaseio.com/orders/$orderId.json?auth=$authToken';
     final existingOrderIndex = _orders.indexWhere((o) => o.id == orderId);
     var existingOrder = _orders[existingOrderIndex];
     _orders.removeAt(existingOrderIndex);

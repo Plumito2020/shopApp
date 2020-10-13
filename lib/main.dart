@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
         builder: (ctx, auth, _) => MaterialApp(
           title: 'MyShop',
           theme: ThemeData(
-            primarySwatch: Colors.purple,
+            primaryColor: Color.fromRGBO(64, 61, 57, 1),
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
