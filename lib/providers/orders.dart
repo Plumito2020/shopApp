@@ -8,10 +8,14 @@ import './cart.dart';
 
 class OrderItem {
   final String id;
+  final String orderMakerId;
   final double amount;
   final List<CartItem> products;
   final DateTime dateTime;
   final String orderState;
+  final String deliveryAddress;
+  final String deliveryOption;
+  final DateTime deliveryDate;
 
   OrderItem({
     @required this.id,
@@ -19,6 +23,10 @@ class OrderItem {
     @required this.products,
     @required this.dateTime,
     this.orderState = "inProgress",
+    this.deliveryAddress,
+    this.deliveryOption,
+    this.orderMakerId,
+    this.deliveryDate,
   });
 }
 
@@ -59,6 +67,10 @@ class Orders with ChangeNotifier {
               )
               .toList(),
           orderState: orderData['state'],
+          deliveryAddress: orderData['deliveryAddress'],
+          deliveryOption: orderData['deliveryOption'],
+          orderMakerId: orderData['userId'],
+          deliveryDate: DateTime.parse(orderData['deliveryDate']),
         ),
       );
     });
@@ -81,21 +93,24 @@ class Orders with ChangeNotifier {
       if (orderData["userId"] == userId) {
         loadedOrders.add(
           OrderItem(
-            id: orderId,
-            amount: orderData['amount'],
-            dateTime: DateTime.parse(orderData['dateTime']),
-            products: (orderData['products'] as List<dynamic>)
-                .map(
-                  (item) => CartItem(
-                    id: item['id'],
-                    price: item['price'],
-                    quantity: item['quantity'],
-                    title: item['title'],
-                  ),
-                )
-                .toList(),
-            orderState: orderData['state'],
-          ),
+              id: orderId,
+              amount: orderData['amount'],
+              dateTime: DateTime.parse(orderData['dateTime']),
+              products: (orderData['products'] as List<dynamic>)
+                  .map(
+                    (item) => CartItem(
+                      id: item['id'],
+                      price: item['price'],
+                      quantity: item['quantity'],
+                      title: item['title'],
+                    ),
+                  )
+                  .toList(),
+              orderState: orderData['state'],
+              deliveryAddress: orderData['deliveryAddress'],
+              deliveryOption: orderData['deliveryOption'],
+              orderMakerId: orderData['userId'],
+              deliveryDate: orderData['deliveryDate']),
         );
       }
     });
@@ -143,14 +158,19 @@ class Orders with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addOrder(List<CartItem> cartProducts, double total) async {
+  Future<void> addOrder(
+      List<CartItem> cartProducts,
+      double total,
+      String deliveryOption,
+      String deliveryAddress,
+      DateTime deliverydate) async {
     final url =
         'https://stage-1a56d.firebaseio.com/orders.json?auth=$authToken';
     final timestamp = DateTime.now();
     final response = await http.post(
       url,
       body: json.encode({
-        'userId': "XMlft7aDaNdaGrRSeZz33gZIMVC3",
+        'userId': userId,
         'amount': total,
         'dateTime': timestamp.toIso8601String(),
         'products': cartProducts
@@ -162,6 +182,9 @@ class Orders with ChangeNotifier {
                 })
             .toList(),
         'state': "In progress...",
+        'deliveryOption': deliveryOption,
+        'deliveryAddress': deliveryAddress,
+        'deliveryDate': deliverydate.toIso8601String(), // default date
       }),
     );
     _orders.insert(
@@ -171,6 +194,11 @@ class Orders with ChangeNotifier {
         amount: total,
         dateTime: timestamp,
         products: cartProducts,
+        orderState: "In progress...",
+        deliveryAddress: deliveryAddress,
+        deliveryOption: deliveryOption,
+        orderMakerId: userId,
+        // deliveryDate: deliverydate,
       ),
     );
     notifyListeners();
@@ -182,8 +210,9 @@ class Orders with ChangeNotifier {
     if (orderIndex >= 0) {
       final url =
           'https://stage-1a56d.firebaseio.com/orders/$id.json?auth=$authToken';
-      await http.put(url,
+      await http.patch(url,
           body: json.encode({
+            'userId': order.orderMakerId,
             'amount': order.amount,
             'dateTime': order.dateTime.toIso8601String(),
             'products': order.products
@@ -195,6 +224,9 @@ class Orders with ChangeNotifier {
                     })
                 .toList(),
             'state': order.orderState,
+            'deliveryOption': order.deliveryOption,
+            'deliveryAddress': order.deliveryAddress,
+            'deliveryDate': order.deliveryDate.toIso8601String(),
           }));
       _orders[orderIndex] = order;
       print(order.orderState);

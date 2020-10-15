@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -21,10 +19,32 @@ class _OrderItemState extends State<OrderItem> {
   var _isLoading = false;
   var _isLoadingArchive = false;
   DateTime _delivryDate;
-  Map<String, bool> _delivryOption = {
-    "onSite": false,
-    "delivry": false,
-  };
+
+  Future<void> _confirmOrder() async {
+    if (_delivryDate != null) {
+      Navigator.of(context).pop();
+      setState(() {
+        _isLoading = true;
+      });
+      await Provider.of<Orders>(context, listen: false).confirmOrCancelOrder(
+        widget.order.id,
+        ord.OrderItem(
+          id: widget.order.id,
+          amount: widget.order.amount,
+          dateTime: widget.order.dateTime,
+          products: widget.order.products,
+          orderState: "Confirmed",
+          orderMakerId: widget.order.orderMakerId,
+          deliveryAddress: widget.order.deliveryAddress,
+          deliveryOption: widget.order.deliveryOption,
+          deliveryDate: _delivryDate,
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _deliveryBottomSheet() {
     showModalBottomSheet(
@@ -43,7 +63,7 @@ class _OrderItemState extends State<OrderItem> {
             return Padding(
               padding: MediaQuery.of(context).viewInsets,
               child: Container(
-                height: 290,
+                height: 200,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -114,113 +134,7 @@ class _OrderItemState extends State<OrderItem> {
                             )),
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        "Delivery options",
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ),
-                    // Delivry options
-                    Row(
-                      children: [
-                        Expanded(
-                            flex: 1,
-                            child: FlatButton(
-                              onPressed: () {
-                                setState(() {
-                                  _delivryOption["onSite"] =
-                                      !_delivryOption["onSite"];
-                                  _delivryOption["delivry"] = false;
-                                });
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 50,
-                                // width: 80,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 20),
-                                  child: Text('On site',
-                                      style: (_delivryOption["onSite"] == true)
-                                          ? Theme.of(context)
-                                              .textTheme
-                                              .body1
-                                              .copyWith(
-                                                  color: Colors.white,
-                                                  fontSize: 18)
-                                          : Theme.of(context)
-                                              .textTheme
-                                              .body1
-                                              .copyWith(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 18)),
-                                ),
-                                decoration: (_delivryOption["onSite"] == true)
-                                    ? BoxDecoration(
-                                        color: Colors.grey[600],
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20)))
-                                    : BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(
-                                          color: Colors.grey[600],
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20))),
-                              ),
-                            )),
-                        Expanded(
-                          flex: 1,
-                          child: FlatButton(
-                            onPressed: () {
-                              setState(() {
-                                _delivryOption["delivry"] =
-                                    !_delivryOption["delivry"];
-                                _delivryOption["onSite"] = false;
-                              });
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50,
-                              // width: 80,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 20),
-                                child: Text('Delivry',
-                                    style: (_delivryOption["delivry"] == true)
-                                        ? Theme.of(context)
-                                            .textTheme
-                                            .body1
-                                            .copyWith(
-                                                color: Colors.white,
-                                                fontSize: 18)
-                                        : Theme.of(context)
-                                            .textTheme
-                                            .body1
-                                            .copyWith(
-                                                color: Colors.grey[600],
-                                                fontSize: 18)),
-                              ),
-                              decoration: (_delivryOption["delivry"] == true)
-                                  ? BoxDecoration(
-                                      color: Colors.grey[600],
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(20)))
-                                  : BoxDecoration(
-                                      color: Colors.white,
-                                      border:
-                                          Border.all(color: Colors.grey[600]),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+
                     SizedBox(
                       height: 30,
                     ),
@@ -230,7 +144,7 @@ class _OrderItemState extends State<OrderItem> {
                         alignment: Alignment.bottomRight,
                         child: InkWell(
                             onTap: () {
-                              //  Do
+                              _confirmOrder();
                             },
                             child: Text(
                               "Confirm",
@@ -252,355 +166,435 @@ class _OrderItemState extends State<OrderItem> {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+      child: Dismissible(
+        background: Container(
+          color: Color.fromRGBO(64, 61, 57, 1),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.archive_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+              Text(
+                'Archive',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          alignment: Alignment.centerRight,
+          padding: EdgeInsets.only(right: 20),
+          margin: EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 4,
+          ),
         ),
-        margin: EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            ListTile(
-              leading: (_isLoadingArchive)
-                  ? CircularProgressIndicator()
-                  // Archive Order
-                  : InkWell(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.archive_rounded,
-                            color: Color.fromRGBO(64, 61, 57, 1),
-                            size: 25,
-                          ),
-                          Text(
-                            'Archive',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color.fromRGBO(64, 61, 57, 1),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        return showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            title: Text(
-                              'Are you sure?',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Color.fromRGBO(254, 95, 85, 1),
-                              ),
-                            ),
-                            content: Text(
-                              'Do you want to archive this order?',
-                            ),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text(
-                                  'No',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(ctx).pop(false);
-                                },
-                              ),
-                              FlatButton(
-                                child: Text(
-                                  'Yes',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                onPressed: () async {
-                                  Navigator.of(ctx).pop(true);
-                                  setState(() {
-                                    _isLoadingArchive = true;
-                                  });
-                                  await Provider.of<Orders>(context,
-                                          listen: false)
-                                      .archiveOrder(widget.order);
-                                  setState(() {
-                                    _isLoadingArchive = false;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (direction) {
+          return showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               title: Text(
-                'Total : ${widget.order.amount} Dhs',
-                style: TextStyle(color: Colors.black),
+                'Are you sure?',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Color.fromRGBO(254, 95, 85, 1),
+                ),
               ),
-              subtitle: Row(
-                children: [
-                  Text(
-                    DateFormat('dd/MM/yyyy hh:mm')
-                        .format(widget.order.dateTime),
+              content: Text(
+                'Do you want to archive this order?',
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'No',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black,
+                    ),
                   ),
-                  SizedBox(
-                    width: 8,
+                  onPressed: () {
+                    Navigator.of(ctx).pop(false);
+                  },
+                ),
+                FlatButton(
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black,
+                    ),
                   ),
-                  _isLoading
-                      ? Container(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(),
-                        )
-                      : Text(
-                          '${widget.order.orderState}',
-                          style:
-                              TextStyle(color: Color.fromRGBO(64, 61, 57, 1)),
-                        ),
-                ],
-              ),
-              trailing: IconButton(
-                icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-                onPressed: () {
-                  setState(() {
-                    _expanded = !_expanded;
-                  });
-                },
-              ),
+                  onPressed: () async {
+                    Navigator.of(ctx).pop(true);
+                  },
+                ),
+              ],
             ),
-            if (_expanded)
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                height: widget.order.products.length * 20.0 + 80,
-                child: ListView(children: [
-                  ...widget.order.products
-                      .map(
-                        (prod) => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              prod.title,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+          );
+        },
+        onDismissed: (direction) {
+          Provider.of<Orders>(context, listen: false)
+              .archiveOrder(widget.order);
+        },
+        key: Key(widget.order.id),
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          margin: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                leading: (_isLoadingArchive)
+                    ? CircularProgressIndicator()
+                    // Archive Order
+                    : InkWell(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Color.fromRGBO(64, 61, 57, 1),
+                              size: 25,
                             ),
                             Text(
-                              '${prod.quantity}x ${prod.price} Dhs',
+                              'Infos',
                               style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
+                                fontSize: 12,
+                                color: Color.fromRGBO(64, 61, 57, 1),
                               ),
-                            )
+                            ),
                           ],
                         ),
-                      )
-                      .toList(),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  Row(
-                    children: [
-                      // Confirm order
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 5),
-                          child: InkWell(
-                            onTap: () {
-                              _deliveryBottomSheet();
-                              // return showDialog(
-                              //   context: context,
-                              //   builder: (ctx) => AlertDialog(
-                              //     shape: RoundedRectangleBorder(
-                              //       borderRadius: BorderRadius.circular(20),
-                              //     ),
-                              //     title: Text(
-                              //       'Are you sure?',
-                              //       style: TextStyle(
-                              //         fontSize: 20,
-                              //         color: Color.fromRGBO(254, 95, 85, 1),
-                              //       ),
-                              //     ),
-                              //     content: Text(
-                              //       'Do you want to confirm this order?',
-                              //     ),
-                              //     actions: <Widget>[
-                              //       FlatButton(
-                              //         child: Text(
-                              //           'No',
-                              //           style: TextStyle(
-                              //             fontSize: 15,
-                              //             color: Colors.black,
-                              //           ),
-                              //         ),
-                              //         onPressed: () {
-                              //           Navigator.of(ctx).pop(false);
-                              //         },
-                              //       ),
-                              //       FlatButton(
-                              //         child: Text(
-                              //           'Yes',
-                              //           style: TextStyle(
-                              //             fontSize: 15,
-                              //             color: Colors.black,
-                              //           ),
-                              //         ),
-                              //         onPressed: () async {
-                              //           Navigator.of(ctx).pop(true);
-                              //           setState(() {
-                              //             _isLoading = true;
-                              //           });
-                              //           await Provider.of<Orders>(context,
-                              //                   listen: false)
-                              //               .confirmOrCancelOrder(
-                              //                   widget.order.id,
-                              //                   ord.OrderItem(
-                              //                     id: widget.order.id,
-                              //                     amount: widget.order.amount,
-                              //                     dateTime:
-                              //                         widget.order.dateTime,
-                              //                     products:
-                              //                         widget.order.products,
-                              //                     orderState: "Confirmed",
-                              //                   ));
-                              //           setState(() {
-                              //             _isLoading = false;
-                              //           });
-                              //         },
-                              //       ),
-                              //     ],
-                              //   ),
-                              // );
-                            },
-                            child: Container(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: Center(
-                                  child: Text(
-                                    'Confirm order',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .body1
-                                        .copyWith(
-                                            color: Colors.white, fontSize: 18),
+                        onTap: () {
+                          return showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              elevation: 3,
+                              title: Icon(
+                                Icons.delivery_dining,
+                                size: 50,
+                                color: Color.fromRGBO(235, 94, 40, 1),
+                              ),
+                              content: Container(
+                                height:
+                                    (widget.order.deliveryOption == "onSite")
+                                        ? 100
+                                        : 200,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        (widget.order.deliveryOption ==
+                                                "onSite")
+                                            ? "The costumer will drop by to pick up his order !"
+                                            : "The order will be delivred to the costumer !",
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 18),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      if (widget.order.deliveryOption !=
+                                          "onSite")
+                                        Divider(),
+                                      if (widget.order.deliveryOption !=
+                                          "onSite")
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                      if (widget.order.deliveryOption !=
+                                          "onSite")
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            "Address  ",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    235, 94, 40, 1),
+                                                fontSize: 15),
+                                          ),
+                                        ),
+                                      if (widget.order.deliveryOption !=
+                                          "onSite")
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            "${widget.order.deliveryAddress}",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15),
+                                          ),
+                                        ),
+                                      if (widget.order.deliveryOption !=
+                                          "onSite")
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                      if (widget.order.deliveryDate !=
+                                          DateTime(2000))
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            "Delivery date  ",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    235, 94, 40, 1),
+                                                fontSize: 15),
+                                          ),
+                                        ),
+                                      if (widget.order.deliveryDate !=
+                                          DateTime(2000))
+                                        Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            DateFormat('dd/MM/yyyy').format(
+                                                widget.order.deliveryDate),
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15),
+                                          ),
+                                        )
+                                    ],
                                   ),
                                 ),
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                                color: Color.fromRGBO(6, 214, 160, 1),
+                            ),
+                          );
+                        }),
+                title: Text(
+                  'Total : ${widget.order.amount} Dhs',
+                  style: TextStyle(color: Colors.black),
+                ),
+                subtitle: Row(
+                  children: [
+                    Text(
+                      DateFormat('dd/MM/yyyy hh:mm')
+                          .format(widget.order.dateTime),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    _isLoading
+                        ? Container(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(),
+                          )
+                        : Text(
+                            '${widget.order.orderState}',
+                            style:
+                                TextStyle(color: Color.fromRGBO(64, 61, 57, 1)),
+                          ),
+                  ],
+                ),
+                trailing: IconButton(
+                  icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+                  onPressed: () {
+                    setState(() {
+                      _expanded = !_expanded;
+                    });
+                  },
+                ),
+              ),
+              if (_expanded)
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                  height: widget.order.products.length * 20.0 + 80,
+                  child: ListView(children: [
+                    ...widget.order.products
+                        .map(
+                          (prod) => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                prod.title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${prod.quantity}x ${prod.price} Dhs',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey,
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                        .toList(),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Row(
+                      children: [
+                        // Confirm order
+                        if (widget.order.orderState != "Confirmed")
+                          Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 5),
+                              child: InkWell(
+                                onTap: () {
+                                  _deliveryBottomSheet();
+                                },
+                                child: Container(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: Center(
+                                      child: Text(
+                                        'Confirm order',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .body1
+                                            .copyWith(
+                                                color: Colors.white,
+                                                fontSize: 18),
+                                      ),
+                                    ),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                    color: Color.fromRGBO(6, 214, 160, 1),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      // Cancel
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: InkWell(
-                            onTap: () {
-                              return showDialog(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                        // Cancel
+                        if (widget.order.orderState != "Canceled")
+                          Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: InkWell(
+                                onTap: () {
+                                  return showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      title: Text(
+                                        'Are you sure?',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Color.fromRGBO(254, 95, 85, 1),
+                                        ),
+                                      ),
+                                      content: Text(
+                                        'Do you want to cancel this order?',
+                                      ),
+                                      actions: <Widget>[
+                                        FlatButton(
+                                          child: Text(
+                                            'No',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(ctx).pop(false);
+                                          },
+                                        ),
+                                        FlatButton(
+                                          child: Text(
+                                            'Yes',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          onPressed: () async {
+                                            Navigator.of(ctx).pop(true);
+                                            setState(() {
+                                              _isLoading = true;
+                                            });
+                                            await Provider.of<Orders>(context,
+                                                    listen: false)
+                                                .confirmOrCancelOrder(
+                                              widget.order.id,
+                                              ord.OrderItem(
+                                                id: widget.order.id,
+                                                amount: widget.order.amount,
+                                                dateTime: widget.order.dateTime,
+                                                products: widget.order.products,
+                                                orderState: "Canceled",
+                                                orderMakerId:
+                                                    widget.order.orderMakerId,
+                                                deliveryAddress: widget
+                                                    .order.deliveryAddress,
+                                                deliveryOption:
+                                                    widget.order.deliveryOption,
+                                                deliveryDate: DateTime(2000),
+                                              ),
+                                            );
+                                            setState(() {
+                                              _isLoading = false;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: Center(
+                                      child: Text(
+                                        'Cancel order',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .body1
+                                            .copyWith(
+                                                color: Colors.white,
+                                                fontSize: 18),
+                                      ),
+                                    ),
                                   ),
-                                  title: Text(
-                                    'Are you sure?',
-                                    style: TextStyle(
-                                      fontSize: 20,
+                                  decoration: BoxDecoration(
                                       color: Color.fromRGBO(254, 95, 85, 1),
-                                    ),
-                                  ),
-                                  content: Text(
-                                    'Do you want to cancel this order?',
-                                  ),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text(
-                                        'No',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(ctx).pop(false);
-                                      },
-                                    ),
-                                    FlatButton(
-                                      child: Text(
-                                        'Yes',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        Navigator.of(ctx).pop(true);
-                                        setState(() {
-                                          _isLoading = true;
-                                        });
-                                        await Provider.of<Orders>(context,
-                                                listen: false)
-                                            .confirmOrCancelOrder(
-                                                widget.order.id,
-                                                ord.OrderItem(
-                                                  id: widget.order.id,
-                                                  amount: widget.order.amount,
-                                                  dateTime:
-                                                      widget.order.dateTime,
-                                                  products:
-                                                      widget.order.products,
-                                                  orderState: "Cancel",
-                                                ));
-                                        setState(() {
-                                          _isLoading = false;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: Container(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: Center(
-                                  child: Text(
-                                    'Cancel order',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .body1
-                                        .copyWith(
-                                            color: Colors.white, fontSize: 18),
-                                  ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
                                 ),
                               ),
-                              decoration: BoxDecoration(
-                                  color: Color.fromRGBO(254, 95, 85, 1),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  )
-                ]),
-              )
-          ],
+                      ],
+                    )
+                  ]),
+                )
+            ],
+          ),
         ),
       ),
     );
