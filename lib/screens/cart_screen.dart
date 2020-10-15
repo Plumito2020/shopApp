@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stageApp/screens/orders_screen.dart';
 
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
@@ -115,6 +116,7 @@ class _OrderButtonState extends State<OrderButton> {
           _isLoading = false;
         });
         widget.cart.clear();
+        Navigator.of(context).popAndPushNamed(OrdersScreen.routeName);
       }
     }
   }
@@ -157,6 +159,9 @@ class _OrderButtonState extends State<OrderButton> {
                         style: TextStyle(fontSize: 20),
                       ),
                     ),
+                    SizedBox(
+                      height: 8,
+                    ),
                     // Delivry options
                     Row(
                       children: [
@@ -177,7 +182,7 @@ class _OrderButtonState extends State<OrderButton> {
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 20),
-                                  child: Text('On site',
+                                  child: Text("I'll drop by !",
                                       style: (_delivryOption["onSite"] == true)
                                           ? Theme.of(context)
                                               .textTheme
@@ -224,7 +229,7 @@ class _OrderButtonState extends State<OrderButton> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 20),
-                                child: Text('Delivry',
+                                child: Text('Deliver it !',
                                     style: (_delivryOption["delivry"] == true)
                                         ? Theme.of(context)
                                             .textTheme

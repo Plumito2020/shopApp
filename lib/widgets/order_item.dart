@@ -383,9 +383,13 @@ class _OrderItemState extends State<OrderItem> {
                             ),
                           );
                         }),
-                title: Text(
-                  'Total : ${widget.order.amount} Dhs',
-                  style: TextStyle(color: Colors.black),
+                title: Row(
+                  children: [
+                    Text(
+                      '${widget.order.amount} Dhs',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ],
                 ),
                 subtitle: Row(
                   children: [
@@ -404,8 +408,14 @@ class _OrderItemState extends State<OrderItem> {
                           )
                         : Text(
                             '${widget.order.orderState}',
-                            style:
-                                TextStyle(color: Color.fromRGBO(64, 61, 57, 1)),
+                            style: TextStyle(
+                              color:
+                                  (widget.order.orderState == "In progress...")
+                                      ? Colors.amber[600]
+                                      : (widget.order.orderState == "Confirmed")
+                                          ? Color.fromRGBO(6, 214, 160, 1)
+                                          : Color.fromRGBO(254, 95, 85, 1),
+                            ),
                           ),
                   ],
                 ),

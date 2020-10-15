@@ -158,6 +158,26 @@ class Orders with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteOrderFromUser(OrderItem order) async {
+    final orderId = order.id;
+
+    final orderUrl =
+        'https://stage-1a56d.firebaseio.com/orders/$orderId.json?auth=$authToken';
+    final existingOrderIndex = _orders.indexWhere((o) => o.id == orderId);
+    var existingOrder = _orders[existingOrderIndex];
+    _orders.removeAt(existingOrderIndex);
+    notifyListeners();
+    final responseOrder = await http.delete(orderUrl);
+    if (responseOrder.statusCode >= 400) {
+      _orders.insert(existingOrderIndex, existingOrder);
+      notifyListeners();
+      throw HttpException('Could not archive the order.');
+    }
+    existingOrder = null;
+
+    notifyListeners();
+  }
+
   Future<void> addOrder(
       List<CartItem> cartProducts,
       double total,
