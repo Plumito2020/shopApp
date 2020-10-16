@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +13,11 @@ enum FilterOptions {
   Favorites,
   All,
 }
+enum Category {
+  Electronic,
+  Hardware,
+  All,
+}
 
 class ProductsOverviewScreen extends StatefulWidget {
   @override
@@ -22,6 +28,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
   var _isInit = true;
   var _isLoading = false;
+  var _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -108,6 +115,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           : Column(
               children: [
                 // Search Bar
+
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Container(
@@ -118,20 +126,53 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                         border: Border.all(color: Colors.grey[300]),
                         borderRadius: BorderRadius.all(Radius.circular(20))),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Icon(
-                            Icons.search,
-                            color: Color.fromRGBO(37, 36, 34, 1),
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Center(
+                            child: Icon(
+                              Icons.search,
+                              color: Color.fromRGBO(37, 36, 34, 1),
+                            ),
                           ),
                         ),
                         SizedBox(
                           width: 5,
                         ),
-                        Text(
-                          'Search',
-                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 13),
+                            child: Center(
+                              child: TextFormField(
+                                controller: _searchController,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) {},
+                                keyboardType: TextInputType.text,
+                                maxLines: 1,
+                                decoration: InputDecoration(
+                                  hintText: "Search",
+                                  hoverColor: Theme.of(context).accentColor,
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(30),
+                                      ),
+                                      borderSide: BorderSide.none),
+                                ),
+                                onChanged: (value) {
+                                  if (value.isEmpty) {
+                                    Provider.of<Products>(context)
+                                        .fetchAndSetProducts();
+                                  } else {
+                                    Provider.of<Products>(context)
+                                        .searchProduct(_searchController.text);
+                                  }
+                                },
+                                // validator: (value) {},
+                                // onSaved: (value) {},
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -143,7 +184,62 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Row(
-                      children: [Text("Category"), Icon(Icons.expand_more)],
+                      children: [
+                        PopupMenuButton(
+                          onSelected: (Category selectedValue) {
+                            if (selectedValue == Category.Electronic) {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              Provider.of<Products>(context)
+                                  .fetchAndSetProductsByCategory("Electronic")
+                                  .then((_) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              });
+                            } else if (selectedValue == Category.Hardware) {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              Provider.of<Products>(context)
+                                  .fetchAndSetProductsByCategory("Hardware")
+                                  .then((_) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              });
+                            } else {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              Provider.of<Products>(context)
+                                  .fetchAndSetProducts()
+                                  .then((_) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              });
+                            }
+                          },
+                          icon: Icon(Icons.filter_list),
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              child: Text('Electronic'),
+                              value: Category.Electronic,
+                            ),
+                            PopupMenuItem(
+                              child: Text('Hardware'),
+                              value: Category.Hardware,
+                            ),
+                            PopupMenuItem(
+                              child: Text('All'),
+                              value: Category.All,
+                            ),
+                          ],
+                        ),
+                        Text("Filters"),
+                      ],
                     ),
                   ),
                 ),

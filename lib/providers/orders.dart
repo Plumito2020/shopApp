@@ -93,24 +93,25 @@ class Orders with ChangeNotifier {
       if (orderData["userId"] == userId) {
         loadedOrders.add(
           OrderItem(
-              id: orderId,
-              amount: orderData['amount'],
-              dateTime: DateTime.parse(orderData['dateTime']),
-              products: (orderData['products'] as List<dynamic>)
-                  .map(
-                    (item) => CartItem(
-                      id: item['id'],
-                      price: item['price'],
-                      quantity: item['quantity'],
-                      title: item['title'],
-                    ),
-                  )
-                  .toList(),
-              orderState: orderData['state'],
-              deliveryAddress: orderData['deliveryAddress'],
-              deliveryOption: orderData['deliveryOption'],
-              orderMakerId: orderData['userId'],
-              deliveryDate: orderData['deliveryDate']),
+            id: orderId,
+            amount: orderData['amount'],
+            dateTime: DateTime.parse(orderData['dateTime']),
+            products: (orderData['products'] as List<dynamic>)
+                .map(
+                  (item) => CartItem(
+                    id: item['id'],
+                    price: item['price'],
+                    quantity: item['quantity'],
+                    title: item['title'],
+                  ),
+                )
+                .toList(),
+            orderState: orderData['state'],
+            deliveryAddress: orderData['deliveryAddress'],
+            deliveryOption: orderData['deliveryOption'],
+            orderMakerId: orderData['userId'],
+            deliveryDate: DateTime.parse(orderData['deliveryDate']),
+          ),
         );
       }
     });

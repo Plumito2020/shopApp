@@ -12,7 +12,7 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
-  bool _isAdmin = false;
+  bool _isAdmin;
 
   bool get isAdmin {
     return _isAdmin;
@@ -37,6 +37,12 @@ class Auth with ChangeNotifier {
 
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
+    // Verify if its an admin account
+    if (email.contains("zak@gmail.fr")) {
+      _isAdmin = true;
+    } else {
+      _isAdmin = false;
+    }
     final url =
         'https://www.googleapis.com/identitytoolkit/v3/relyingparty/$urlSegment?key=AIzaSyBAF1vZLRznX84bcoB2cuca3K_I5JJveGg';
     try {
@@ -64,12 +70,7 @@ class Auth with ChangeNotifier {
         ),
       );
       _autoLogout();
-      // Verify if its an admin account
-      if (email.contains("zak@gmail.fr")) {
-        _isAdmin = true;
-      } else {
-        _isAdmin = false;
-      }
+
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       final userData = json.encode(
@@ -77,6 +78,7 @@ class Auth with ChangeNotifier {
           'token': _token,
           'userId': _userId,
           'expiryDate': _expiryDate.toIso8601String(),
+          'isAdmin': _isAdmin,
         },
       );
       prefs.setString('userData', userData);
@@ -108,6 +110,7 @@ class Auth with ChangeNotifier {
     }
     _token = extractedUserData['token'];
     _userId = extractedUserData['userId'];
+    _isAdmin = _userId = extractedUserData['isAdmin'];
     _expiryDate = expiryDate;
     notifyListeners();
     _autoLogout();

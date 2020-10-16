@@ -32,7 +32,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
   };
   var _isInit = true;
   var _isLoading = false;
-
+  Map<String, bool> _category = {
+    "Hardware": false,
+    "Electronic": false,
+  };
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
@@ -89,6 +92,20 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _form.currentState.save();
+    String category = "";
+    _category.forEach((key, value) {
+      if (value == true) {
+        category = key;
+      }
+    });
+    _editedProduct = Product(
+        title: _editedProduct.title,
+        price: _editedProduct.price,
+        description: _editedProduct.description,
+        imageUrl: _editedProduct.imageUrl,
+        id: _editedProduct.id,
+        isFavorite: _editedProduct.isFavorite,
+        category: category);
     setState(() {
       _isLoading = true;
     });
@@ -301,6 +318,113 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text("Category"),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              flex: 1,
+                              child: FlatButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _category["Electronic"] =
+                                        !_category["Electronic"];
+                                    _category["Hardware"] = false;
+                                  });
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  // width: 80,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 20),
+                                    child: Text("Electronic",
+                                        style: (_category["Electronic"] == true)
+                                            ? Theme.of(context)
+                                                .textTheme
+                                                .body1
+                                                .copyWith(
+                                                    color: Colors.white,
+                                                    fontSize: 18)
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .body1
+                                                .copyWith(
+                                                    color: Color.fromRGBO(
+                                                        64, 61, 57, 1),
+                                                    fontSize: 18)),
+                                  ),
+                                  decoration: (_category["Electronic"] == true)
+                                      ? BoxDecoration(
+                                          color: Color.fromRGBO(64, 61, 57, 1),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)))
+                                      : BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color:
+                                                Color.fromRGBO(64, 61, 57, 1),
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10))),
+                                ),
+                              )),
+                          Expanded(
+                            flex: 1,
+                            child: FlatButton(
+                              onPressed: () {
+                                setState(() {
+                                  _category["Hardware"] =
+                                      !_category["Hardware"];
+                                  _category["Electronic"] = false;
+                                });
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                height: 50,
+                                // width: 80,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 20),
+                                  child: Text('Hardware',
+                                      style: (_category["Hardware"] == true)
+                                          ? Theme.of(context)
+                                              .textTheme
+                                              .body1
+                                              .copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 18)
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .body1
+                                              .copyWith(
+                                                  color: Color.fromRGBO(
+                                                      64, 61, 57, 1),
+                                                  fontSize: 18)),
+                                ),
+                                decoration: (_category["Hardware"] == true)
+                                    ? BoxDecoration(
+                                        color: Color.fromRGBO(64, 61, 57, 1),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)))
+                                    : BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                            color:
+                                                Color.fromRGBO(64, 61, 57, 1)),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10))),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
