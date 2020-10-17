@@ -4,6 +4,11 @@ import 'package:provider/provider.dart';
 import '../providers/product.dart';
 import '../providers/products.dart';
 
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
 
@@ -147,9 +152,54 @@ class _EditProductScreenState extends State<EditProductScreen> {
     // Navigator.of(context).pop();
   }
 
+  File _image;
+  final picker = ImagePicker();
+
+  Future _imgFromGallery() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = File(pickedFile.path.toString());
+    });
+
+    final StorageReference ref =
+        FirebaseStorage.instance.ref().child("img.jpeg");
+    final StorageUploadTask uploadTask = ref.putFile(_image);
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        backgroundColor: Color.fromRGBO(108, 99, 255, 1),
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(
+                        Icons.photo_library,
+                        color: Colors.white,
+                      ),
+                      title: new Text(
+                        'Galerie',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Edit Product'),
         shape: ContinuousRectangleBorder(
@@ -255,76 +305,79 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         );
                       },
                     ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          width: 100,
-                          height: 100,
-                          margin: EdgeInsets.only(
-                            top: 8,
-                            right: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          child: _imageUrlController.text.isEmpty
-                              ? Text('Enter a URL')
-                              : FittedBox(
-                                  child: Image.network(
-                                    _imageUrlController.text,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            decoration: InputDecoration(labelText: 'Image URL'),
-                            keyboardType: TextInputType.url,
-                            textInputAction: TextInputAction.done,
-                            controller: _imageUrlController,
-                            focusNode: _imageUrlFocusNode,
-                            onFieldSubmitted: (_) {
-                              _saveForm();
-                            },
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter an image URL.';
-                              }
-                              if (!value.startsWith('http') &&
-                                  !value.startsWith('https')) {
-                                return 'Please enter a valid URL.';
-                              }
-                              if (!value.endsWith('.png') &&
-                                  !value.endsWith('.jpg') &&
-                                  !value.endsWith('.jpeg')) {
-                                return 'Please enter a valid image URL.';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _editedProduct = Product(
-                                title: _editedProduct.title,
-                                price: _editedProduct.price,
-                                description: _editedProduct.description,
-                                imageUrl: value,
-                                id: _editedProduct.id,
-                                isFavorite: _editedProduct.isFavorite,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.end,
+                    //   children: <Widget>[
+                    //     Container(
+                    //       width: 100,
+                    //       height: 100,
+                    //       margin: EdgeInsets.only(
+                    //         top: 8,
+                    //         right: 10,
+                    //       ),
+                    //       decoration: BoxDecoration(
+                    //         border: Border.all(
+                    //           width: 1,
+                    //           color: Colors.grey,
+                    //         ),
+                    //       ),
+                    //       child: _imageUrlController.text.isEmpty
+                    //           ? Text('Enter a URL')
+                    //           : FittedBox(
+                    //               child: Image.network(
+                    //                 _imageUrlController.text,
+                    //                 fit: BoxFit.cover,
+                    //               ),
+                    //             ),
+                    //     ),
+                    //     Expanded(
+                    //       child: TextFormField(
+                    //         decoration: InputDecoration(labelText: 'Image URL'),
+                    //         keyboardType: TextInputType.url,
+                    //         textInputAction: TextInputAction.done,
+                    //         controller: _imageUrlController,
+                    //         focusNode: _imageUrlFocusNode,
+                    //         onFieldSubmitted: (_) {
+                    //           _saveForm();
+                    //         },
+                    //         validator: (value) {
+                    //           if (value.isEmpty) {
+                    //             return 'Please enter an image URL.';
+                    //           }
+                    //           if (!value.startsWith('http') &&
+                    //               !value.startsWith('https')) {
+                    //             return 'Please enter a valid URL.';
+                    //           }
+                    //           if (!value.endsWith('.png') &&
+                    //               !value.endsWith('.jpg') &&
+                    //               !value.endsWith('.jpeg')) {
+                    //             return 'Please enter a valid image URL.';
+                    //           }
+                    //           return null;
+                    //         },
+                    //         onSaved: (value) {
+                    //           _editedProduct = Product(
+                    //             title: _editedProduct.title,
+                    //             price: _editedProduct.price,
+                    //             description: _editedProduct.description,
+                    //             imageUrl: value,
+                    //             id: _editedProduct.id,
+                    //             isFavorite: _editedProduct.isFavorite,
+                    //           );
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     SizedBox(
-                      height: 10,
+                      height: 15,
                     ),
-                    Text("Category"),
+                    Text(
+                      "Category",
+                      style: TextStyle(fontSize: 15),
+                    ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                       child: Row(
                         children: [
                           Expanded(
@@ -424,6 +477,42 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        _showPicker(context);
+                      },
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: Container(
+                          width: double.infinity,
+                          height: 50,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Center(
+                                child: Icon(
+                                  Icons.camera_enhance,
+                                  color: Color.fromRGBO(37, 36, 34, 1),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "Select an image",
+                                style: TextStyle(fontSize: 17),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],

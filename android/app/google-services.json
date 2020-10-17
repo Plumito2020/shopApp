@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "431327328725",
+    "firebase_url": "https://shopapp-96eb4.firebaseio.com",
+    "project_id": "shopapp-96eb4",
+    "storage_bucket": "shopapp-96eb4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431327328725:android:502b1c2d719e7f8970e55c",
+        "android_client_info": {
+          "package_name": "com.example.stageApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "431327328725-7mb6ri9njktfeg2rc0s0cf8dg9p5i357.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0GRexSsGw0HovcJ_UM7zRS-eGb0z50OE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431327328725-7mb6ri9njktfeg2rc0s0cf8dg9p5i357.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
